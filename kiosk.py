@@ -22,7 +22,23 @@ class Kiosk(object):
                 module.width = event.width
                 module.height = event.height
                 widget.disconnect(self.initial_update_handler_ids[widget])
+                module.update()
         return handler
+
+    def realize_callback(self, widget):
+        widget.window.set_cursor(self.get_invisible_cursor())
+
+    def get_invisible_cursor(self):
+        pix_data = """/* XPM */
+ static char * invisible_xpm[] = {
+ "1 1 1 1",
+ "       c None",
+ " "};"""
+        color = gtk.gdk.Color()
+        pix = gtk.gdk.pixmap_create_from_data(
+            None, pix_data, 1, 1, 1, color, color)
+        invisible = gtk.gdk.Cursor(pix, pix, color, color, 0, 0)
+        return invisible
 
     def update_modules(self):
         for monitor_number, monitor in enumerate(self.monitors):
@@ -43,8 +59,7 @@ class Kiosk(object):
             sys.exit(1)
 
         self.monitors = []
-        self.display_modules = [HTMLModule(self.config),
-                                ImageModule(self.config)]
+        self.display_modules = [ImageModule(self.config)]
         self.initial_update_handler_ids = {}
 
         for monitor_number in xrange(self.screen.get_n_monitors()):
@@ -55,8 +70,11 @@ class Kiosk(object):
 
             monitor_rect = self.screen.get_monitor_geometry(monitor_number)
             monitor.move(monitor_rect.x, monitor_rect.y)
+            monitor.connect("realize", self.realize_callback)
+            monitor.connect("destroy", gtk.main_quit)
 
             monitor.fullscreen()
+            monitor.set_decorated(False)
             self.monitors.append(monitor)
 
         for monitor_number, monitor in enumerate(self.monitors):
