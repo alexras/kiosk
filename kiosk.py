@@ -59,7 +59,10 @@ class Kiosk(object):
             sys.exit(1)
 
         self.monitors = []
-        self.display_modules = [ImageModule(self.config)]
+        self.display_modules = [HTMLModule(self.config),
+                                PDFModule(self.config),
+                                ImageModule(self.config),
+                                HTMLModule(self.config)]
         self.initial_update_handler_ids = {}
 
         for monitor_number in xrange(self.screen.get_n_monitors()):
@@ -84,12 +87,13 @@ class Kiosk(object):
             self.initial_update_handler_ids[monitor] = handler_id
 
             monitor.add(module.get_widget(monitor_number))
-            monitor.show()
+            monitor.show_all()
 
         self.update_timer = gobject.timeout_add_seconds(
             self.config["kiosk"]["transition_time"], self.update_modules)
 
     def main(self):
+        gobject.threads_init()
         gtk.main()
 
 if __name__ == '__main__':

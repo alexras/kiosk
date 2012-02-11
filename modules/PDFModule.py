@@ -12,7 +12,6 @@ class PDFModule(BaseModule):
         super(PDFModule, self).__init__(config)
         self.pdf_image = gtk.Image()
         self.pdf_dir = config["files"]["pdfs"]
-        self.pdf_image.show()
 
     def get_widget(self, monitor_number):
         return self.pdf_image
@@ -28,8 +27,14 @@ class PDFModule(BaseModule):
 
         try:
             pdf_file = file_list[random.randint(0, len(file_list) - 1)]
-            poppler_doc = poppler.document_new_from_file(
-                'file://%s' % (urllib.pathname2url(pdf_file)), password=None)
+            pdf_url = urllib.pathname2url(pdf_file)
+
+            if pdf_url[0:2] == "//":
+                pdf_url = pdf_url[2:]
+
+            pdf_url = "file://%s" % (pdf_url)
+
+            poppler_doc = poppler.document_new_from_file(pdf_url, password=None)
 
             pdf_page = poppler_doc.get_page(0)
             page_width, page_height = map(int, pdf_page.get_size())
@@ -44,9 +49,10 @@ class PDFModule(BaseModule):
 
             scaled_pixbuf = utils.scale_pixbuf(pixbuf, self.width, self.height)
 
+            print "Opening PDF %s'" % (pdf_url)
             self.pdf_image.set_from_pixbuf(None)
             self.pdf_image.set_from_pixbuf(scaled_pixbuf)
         except:
-            print "PDF '%s' is corrupted or inaccessible" % (pdf_file)
+            print "PDF '%s' is corrupted or inaccessible" % (pdf_url)
 
 

@@ -14,7 +14,6 @@ class ImageModule(BaseModule):
         self.image = gtk.Image()
         self.images_dir = config["files"]["images"]
         self.update_image_list()
-        self.image.show()
 
     def update_image_list(self):
         self.image_list = map(lambda x: os.path.join(self.images_dir, x),
@@ -33,6 +32,8 @@ class ImageModule(BaseModule):
             random.randint(0, len(self.image_list) - 1)]
 
         assert os.path.exists(image_file)
+
+        print "Displaying image '%s'" % (image_file)
 
         pixbuf = utils.scale_pixbuf(gtk.gdk.pixbuf_new_from_file(image_file),
                                     self.width, self.height)
