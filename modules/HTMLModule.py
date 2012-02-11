@@ -64,7 +64,5 @@ class HTMLModule(BaseModule):
             current_url = urllib.pathname2url(
                 os.path.join(SCRIPT_DIR, "html_module_error.html"))
 
-        current_url = "http://www.reddit.com/"
-
         print "Opening URL '%s'" % (current_url)
         self.webview.load_uri(current_url)
