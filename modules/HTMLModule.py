@@ -16,11 +16,9 @@ class BrowserPage(webkit.WebView):
         settings = self.get_settings()
         settings.set_property("enable-developer-extras", True)
         self.set_full_content_zoom(True)
-#        self.set_zoom_level(2.0)
 
         # Disable plugins and scripts to be on the safe side
         settings.set_property("enable-plugins", False)
-        settings.set_property("enable-scripts", False)
 
 class HTMLModule(BaseModule):
     def __init__(self, config):
