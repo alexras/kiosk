@@ -16,8 +16,11 @@ class ImageModule(BaseModule):
         self.update_image_list()
 
     def update_image_list(self):
-        self.image_list = map(lambda x: os.path.join(self.images_dir, x),
-                              os.listdir(self.images_dir))
+        self.image_list = filter(
+            lambda x: x[-3:] in ["png", "jpg", "gif", "tif"],
+            map(lambda x: os.path.join(self.images_dir, x),
+                os.listdir(self.images_dir)))
+
         random.shuffle(self.image_list)
 
     def get_widget(self, monitor_number):
