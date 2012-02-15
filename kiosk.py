@@ -22,7 +22,12 @@ class Kiosk(object):
                 module.width = event.width
                 module.height = event.height
                 widget.disconnect(self.initial_update_handler_ids[widget])
-                module.update()
+
+                try:
+                    module.update()
+                except Exception, e:
+                    print >>sys.stderr, "Caught exception:"
+                    print >>sys.stderr, e
         return handler
 
     def realize_callback(self, widget):
@@ -43,7 +48,12 @@ class Kiosk(object):
     def update_modules(self):
         for monitor_number, monitor in enumerate(self.monitors):
             module = self.display_modules[monitor_number]
-            module.update()
+
+            try:
+                module.update()
+            except Exception, e:
+                print >>sys.stderr, "Caught exception:"
+                print >>sys.stderr, e
 
         self.update_timer = gobject.timeout_add_seconds(
             self.config["kiosk"]["transition_time"], self.update_modules)
