@@ -110,6 +110,9 @@ class Kiosk(object):
         gtk.main()
 
 if __name__ == '__main__':
+    log_fp = open(os.path.join(SCRIPT_DIR, "kiosk.log"), 'w+')
+    sys.stdout = log_fp
+    sys.stderr = log_fp
 
     kiosk = Kiosk("config.json")
     kiosk.main()
