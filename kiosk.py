@@ -70,7 +70,7 @@ class Kiosk(object):
 
         self.monitors = []
         self.display_modules = [HTMLModule(self.config),
-                                PDFModule(self.config),
+                                ImageModule(self.config),
                                 ImageModule(self.config),
                                 HTMLModule(self.config)]
         self.initial_update_handler_ids = {}
