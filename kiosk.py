@@ -16,7 +16,7 @@ from modules.PDFModule import PDFModule
 SCRIPT_DIR = os.path.dirname(__file__)
 
 class Kiosk(object):
-    def update_module_handler(self, module):
+    def update_module_handler(self, module, monitor_number):
         def handler(widget, event):
             if event.width > 200:
                 module.width = event.width
@@ -24,6 +24,7 @@ class Kiosk(object):
                 widget.disconnect(self.initial_update_handler_ids[widget])
 
                 try:
+                    print "Refreshing monitor %d" % (monitor_number)
                     module.update()
                 except Exception, e:
                     print >>sys.stderr, "Caught exception:"
@@ -50,6 +51,7 @@ class Kiosk(object):
             module = self.display_modules[monitor_number]
 
             try:
+                print "Refreshing monitor %d" % (monitor_number)
                 module.update()
             except Exception, e:
                 print >>sys.stderr, "Caught exception:"
@@ -93,7 +95,8 @@ class Kiosk(object):
         for monitor_number, monitor in enumerate(self.monitors):
             module = self.display_modules[monitor_number]
             handler_id = monitor.connect("configure_event",
-                                         self.update_module_handler(module))
+                                         self.update_module_handler(
+                    module, monitor_number))
             self.initial_update_handler_ids[monitor] = handler_id
 
             monitor.add(module.get_widget(monitor_number))
