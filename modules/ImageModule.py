@@ -1,42 +1,23 @@
 import gtk
 import os
-import random
-from BaseModule import BaseModule
+from BaseMediaViewerModule import BaseMediaViewerModule
 import utils
+import logging
 
-SCRIPT_DIR = os.path.dirname(__file__)
-
-class ImageModule(BaseModule):
+class ImageModule(BaseMediaViewerModule):
     def __init__(self, config):
-        super(ImageModule, self).__init__(config)
-        self.update_count = 0
+        super(ImageModule, self).__init__(
+            config, config["files"]["images"], [".png", ".jpg", ".gif", ".tif"])
 
         self.image = gtk.Image()
-        self.images_dir = config["files"]["images"]
-        self.update_image_list()
-
-    def update_image_list(self):
-        self.image_list = filter(
-            lambda x: x[-3:] in ["png", "jpg", "gif", "tif"],
-            map(lambda x: os.path.join(self.images_dir, x),
-                os.listdir(self.images_dir)))
-
-        random.shuffle(self.image_list)
 
     def get_widget(self, monitor_number):
         return self.image
 
-    def update(self):
-        if self.update_count % len(self.images_dir) == 0:
-            self.update_image_list()
-        self.update_count += 1
-
-        image_file = self.image_list[
-            random.randint(0, len(self.image_list) - 1)]
-
+    def update_from_media(self, image_file):
         assert os.path.exists(image_file)
 
-        print "Displaying image '%s'" % (image_file)
+        logging.debug("Displaying image '%s'" % (image_file))
 
         pixbuf = utils.scale_pixbuf(gtk.gdk.pixbuf_new_from_file(image_file),
                                     self.width, self.height)

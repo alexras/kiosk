@@ -7,6 +7,7 @@ import os
 import random
 from BaseModule import BaseModule
 import feedparser
+import logging
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
@@ -48,6 +49,9 @@ class HTMLModule(BaseModule):
         self.urls = list(self.urls)
         random.shuffle(self.urls)
 
+        if len(self.urls) == 0:
+            logging.error("URL list is empty")
+
     def get_widget(self, monitor_number):
         return self.widget
 
@@ -62,5 +66,4 @@ class HTMLModule(BaseModule):
             current_url = urllib.pathname2url(
                 os.path.join(SCRIPT_DIR, "html_module_error.html"))
 
-        print "Opening URL '%s'" % (current_url)
         self.webview.load_uri(current_url)

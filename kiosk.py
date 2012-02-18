@@ -8,12 +8,24 @@ import json
 import os
 import sys
 import time
+import logging
+import logging.handlers
 
 from modules.ImageModule import ImageModule
 from modules.HTMLModule import HTMLModule
 from modules.PDFModule import PDFModule
 
 SCRIPT_DIR = os.path.dirname(__file__)
+KIOSK_LOG_FILE = os.path.join(SCRIPT_DIR, "kiosk.log")
+
+# Configure logging to roll over after
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+log_file_handler = logging.handlers.RotatingFileHandler(
+    KIOSK_LOG_FILE, maxBytes=10000000, backupCount=5)
+log_file_handler.setFormatter(logging.Formatter(
+        fmt='%(process)s\t%(asctime)-15s\t%(message)s'))
+logger.addHandler(log_file_handler)
 
 class Kiosk(object):
     def update_module_handler(self, module, monitor_number):
@@ -24,11 +36,10 @@ class Kiosk(object):
                 widget.disconnect(self.initial_update_handler_ids[widget])
 
                 try:
-                    print "Refreshing monitor %d" % (monitor_number)
+                    logging.debug("Refreshing monitor %d" % (monitor_number))
                     module.update()
                 except Exception, e:
-                    print >>sys.stderr, "Caught exception:"
-                    print >>sys.stderr, e
+                    logging.exception(e)
         return handler
 
     def realize_callback(self, widget):
@@ -51,11 +62,10 @@ class Kiosk(object):
             module = self.display_modules[monitor_number]
 
             try:
-                print "Refreshing monitor %d" % (monitor_number)
+                logging.debug("Refreshing monitor %d" % (monitor_number))
                 module.update()
             except Exception, e:
-                print >>sys.stderr, "Caught exception:"
-                print >>sys.stderr, e
+                logging.exception(e)
 
         self.update_timer = gobject.timeout_add_seconds(
             self.config["kiosk"]["transition_time"], self.update_modules)
@@ -67,12 +77,11 @@ class Kiosk(object):
         self.screen = gtk.gdk.screen_get_default()
 
         if self.screen is None:
-            print >>sys.stderr, "Can't initialize screen"
-            sys.exit(1)
+            sys.exit("Can't initialize screen")
 
         self.monitors = []
-        self.display_modules = [HTMLModule(self.config),
-                                ImageModule(self.config),
+        self.display_modules = [PDFModule(self.config),
+                                HTMLModule(self.config),
                                 ImageModule(self.config),
                                 HTMLModule(self.config)]
         self.initial_update_handler_ids = {}
@@ -110,9 +119,5 @@ class Kiosk(object):
         gtk.main()
 
 if __name__ == '__main__':
-    log_fp = open(os.path.join(SCRIPT_DIR, "kiosk.log"), 'w+')
-    sys.stdout = log_fp
-    sys.stderr = log_fp
-
     kiosk = Kiosk("config.json")
     kiosk.main()
