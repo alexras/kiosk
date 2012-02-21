@@ -80,10 +80,11 @@ class Kiosk(object):
             sys.exit("Can't initialize screen")
 
         self.monitors = []
-        self.display_modules = [PDFModule(self.config),
-                                HTMLModule(self.config),
-                                ImageModule(self.config),
-                                HTMLModule(self.config)]
+        self.display_modules = [
+            ImageModule(self.config),
+            PDFModule(self.config),
+            HTMLModule(self.config),
+            HTMLModule(self.config)]
         self.initial_update_handler_ids = {}
 
         for monitor_number in xrange(self.screen.get_n_monitors()):

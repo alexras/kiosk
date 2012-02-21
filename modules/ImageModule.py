@@ -22,5 +22,8 @@ class ImageModule(BaseMediaViewerModule):
         pixbuf = utils.scale_pixbuf(gtk.gdk.pixbuf_new_from_file(image_file),
                                     self.width, self.height)
 
+        logging.debug("width: %d, height: %d" % (
+                pixbuf.get_width(), pixbuf.get_height()))
+
         self.image.set_from_pixbuf(None)
         self.image.set_from_pixbuf(pixbuf)

@@ -1,6 +1,7 @@
 import os
 import random
 from BaseModule import BaseModule
+import logging
 
 class BaseMediaViewerModule(BaseModule):
     def __init__(self, config, media_dir, suffixes):
@@ -22,6 +23,7 @@ class BaseMediaViewerModule(BaseModule):
 
     def refresh_content_list(self):
         try:
+            logging.debug("Refreshing content list ...")
             self.content_list = map(
                 lambda x: os.path.join(self.media_dir, x),
                 filter(self.suffix_filter, os.listdir(self.media_dir)))
