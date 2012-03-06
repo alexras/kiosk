@@ -7,7 +7,7 @@ import logging
 class ImageModule(BaseMediaViewerModule):
     def __init__(self, config):
         super(ImageModule, self).__init__(
-            config, config["files"]["images"], [".png", ".jpg", ".gif", ".tif"])
+            config, config["images"], config["formats"])
 
         self.image = gtk.Image()
 

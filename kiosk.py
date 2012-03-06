@@ -10,15 +10,26 @@ import sys
 import time
 import logging
 import logging.handlers
+import time
 
-from modules.ImageModule import ImageModule
-from modules.HTMLModule import HTMLModule
-from modules.PDFModule import PDFModule
+import modules
+
+# From http://stackoverflow.com/a/452981
+def get_class(classname):
+    classname_parts = classname.split('.')
+    module = '.'.join(classname_parts[:-1])
+    class_obj = __import__(module)
+
+    for component in classname_parts[1:]:
+        class_obj = getattr(class_obj, component)
+
+    return class_obj
 
 SCRIPT_DIR = os.path.dirname(__file__)
 KIOSK_LOG_FILE = os.path.join(SCRIPT_DIR, "kiosk.log")
 
-# Configure logging to roll over after
+# Configure logging to roll over after 10 MB of logs, keeping the most recent 5
+# copies
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 log_file_handler = logging.handlers.RotatingFileHandler(
@@ -70,9 +81,50 @@ class Kiosk(object):
         self.update_timer = gobject.timeout_add_seconds(
             self.config["kiosk"]["transition_time"], self.update_modules)
 
+    def get_monitor_bounds(self):
+        monitor_bounds = {}
+
+        for monitor_number, monitor in self.monitors.items():
+            monitor_geometry = self.screen.get_monitor_geometry(monitor_number)
+
+            monitor_bounds[monitor_number] = {
+                "width" : monitor.width,
+                "height" : monitor.height,
+                "x" : monitor_geometry.x,
+                "y" : monitor_geometry.y
+                }
+
+        return monitor_bounds
+
+    def load_config(self):
+        """
+        Loads the current configuration from the file named by self.config_path
+        into self.config as a dictionary. If you fail to parse the config file,
+        roll back, wait 5 seconds, and re-try until you read a config file
+        successfully
+        """
+        parsed_config = False
+        old_config = self.config
+
+        while not parsed_config:
+            try:
+                with open(self.config_path, 'r') as fp:
+                    self.config = json.load(fp)
+                    parsed_config = True
+            except ValueError, e:
+                self.config = old_config
+                logging.exception(e)
+                time.sleep(5)
+
+    def init_display_module(self, module, module_config):
+        return get_class("modules.%(module_name)s.%(module_name)s" %
+                         {"module_name" : module})(module_config)
+
     def __init__(self, config_file):
-        with open(config_file, 'r') as fp:
-            self.config = json.load(fp)
+        self.config_path = config_file
+        self.config = {}
+
+        self.load_config()
 
         self.screen = gtk.gdk.screen_get_default()
 
@@ -80,11 +132,12 @@ class Kiosk(object):
             sys.exit("Can't initialize screen")
 
         self.monitors = []
-        self.display_modules = [
-            ImageModule(self.config),
-            PDFModule(self.config),
-            HTMLModule(self.config),
-            HTMLModule(self.config)]
+        self.display_modules = []
+
+        for module, module_config in self.config["modules"].items():
+            self.display_modules.append(self.init_display_module(
+                    module, module_config))
+
         self.initial_update_handler_ids = {}
 
         for monitor_number in xrange(self.screen.get_n_monitors()):

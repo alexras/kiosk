@@ -11,7 +11,7 @@ import subprocess
 class PDFModule(BaseMediaViewerModule):
     def __init__(self, config):
         super(PDFModule, self).__init__(
-            config, config["files"]["pdfs"], [".pdf"])
+            config, config["pdfs"], [".pdf"])
 
         self.pdf_image = gtk.Image()
 
