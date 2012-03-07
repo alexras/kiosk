@@ -134,9 +134,9 @@ class Kiosk(object):
         self.monitors = []
         self.display_modules = []
 
-        for module, module_config in self.config["modules"].items():
+        for module_config in self.config["modules"]:
             self.display_modules.append(self.init_display_module(
-                    module, module_config))
+                    module_config["type"], module_config))
 
         self.initial_update_handler_ids = {}
 

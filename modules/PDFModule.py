@@ -19,7 +19,7 @@ class PDFModule(BaseMediaViewerModule):
         return self.pdf_image
 
     def convert_pdfs(self):
-        for filename in self.content_list:
+        for (filename, freshness) in self.content_list:
             png_filename = filename[:-4] + ".png"
 
             if not os.path.exists(png_filename):
