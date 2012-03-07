@@ -25,15 +25,20 @@ class PDFModule(BaseMediaViewerModule):
             if not os.path.exists(png_filename):
                 logging.debug("Converting '%s' to png" % (filename))
 
-                cmd = ('%s -sOutputFile="%s" -sDEVICE=%s -r%d '
+                cmd = ('"%s" -sOutputFile="%s" -sDEVICE=%s -r%d '
                        '-dBATCH -dNOPAUSE -dSAFER "%s"' %
                        (self.config["ghostscript"]["binary_path"],
                         png_filename,
                         self.config["ghostscript"]["output_device"],
                         self.config["ghostscript"]["ppi"],
                         filename))
-                subproc = subprocess.Popen(cmd, shell=True)
-                subproc.communicate()
+                subproc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT)
+                (stdout, stderr) = subproc.communicate()
+
+                if subproc.returncode != 0:
+                    logging.error("PNG conversion failed: %s" % (stdout))
 
     def update_from_media(self, pdf_file):
         self.convert_pdfs()
