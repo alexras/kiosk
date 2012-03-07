@@ -5,7 +5,7 @@ def scale_pixbuf(pixbuf, width, height):
     pixbuf_height = int(pixbuf.get_height())
 
     # By default, attempt to match the display's height
-    image_height = int(0.9 * height)
+    image_height = int(height)
     image_width = int(
         float(image_height * pixbuf_width) / float(pixbuf_height))
 
@@ -13,7 +13,7 @@ def scale_pixbuf(pixbuf, width, height):
     # instead
 
     if image_width > width:
-        image_width = int(0.9 * width)
+        image_width = int(width)
         image_height = int(
             float(image_width * pixbuf_height) / float(pixbuf_width))
 
