@@ -35,9 +35,13 @@ class BaseMediaViewerModule(BaseModule):
     def compute_freshness(self, content_file):
         content_file = os.path.join(self.media_dir, content_file)
 
-        days_since_file_creation = (
-            (time.time() - os.path.getctime(content_file)) /
-            (60 * 60 * 24))
+        # To hack around Windows' silliness, if the modification time is older
+        # than the creation time, use the modification time as the file's age
+        file_creation_time = min(os.path.getctime(content_file),
+                                 os.path.getmtime(content_file))
+
+        days_since_file_creation = ((time.time() - file_creation_time) /
+                                    (60 * 60 * 24))
 
         decays_since_file_creation = int(
             days_since_file_creation / self.freshness_decay_time_days)
