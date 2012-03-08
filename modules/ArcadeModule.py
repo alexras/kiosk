@@ -17,10 +17,9 @@ class BrowserPage(webkit.WebView):
         settings.set_property("enable-plugins", True)
 
 class ArcadeModule(BaseModule):
-    self.arcade_url = "http://www.twitch.tv/ucsdcsearcade/popout"
-
     def __init__(self, config):
         super(ArcadeModule, self).__init__(config)
+        self.arcade_url = "http://www.twitch.tv/ucsdcsearcade/popout"
         self.webview = BrowserPage()
         self.widget = gtk.ScrolledWindow()
         self.widget.add(self.webview)
