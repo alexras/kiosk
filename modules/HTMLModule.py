@@ -8,62 +8,63 @@ import random
 from BaseModule import BaseModule
 import feedparser
 import logging
+import urllib
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
 class BrowserPage(webkit.WebView):
     def __init__(self):
-        webkit.WebView.__init__(self)
-        settings = self.get_settings()
-        settings.set_property("enable-developer-extras", True)
-        self.set_full_content_zoom(True)
+	webkit.WebView.__init__(self)
+	settings = self.get_settings()
+	settings.set_property("enable-developer-extras", True)
+	self.set_full_content_zoom(True)
 
-        # Disable plugins and scripts to be on the safe side
-        settings.set_property("enable-plugins", False)
+	# Disable plugins and scripts to be on the safe side
+	settings.set_property("enable-plugins", False)
 
 class HTMLModule(BaseModule):
     def __init__(self, config):
-        super(HTMLModule, self).__init__(config)
-        self.webview = BrowserPage()
-        self.widget = gtk.ScrolledWindow()
-        self.widget.add(self.webview)
+	super(HTMLModule, self).__init__(config)
+	self.webview = BrowserPage()
+	self.widget = gtk.ScrolledWindow()
+	self.widget.add(self.webview)
 
-        self.feeds = config["rss_feeds"]
+	self.feeds = config["rss_feeds"]
 
-        self.update_urls()
+	self.update_urls()
 
-        self.update_count = 0
+	self.update_count = 0
 
     def update_urls(self):
-        self.urls = set()
+	self.urls = set()
 
-        for feed in self.feeds:
-            parsed_feed = feedparser.parse(feed)
+	for feed in self.feeds:
+	    parsed_feed = feedparser.parse(feed)
 
-            if parsed_feed.bozo == 1:
-                continue
+	    if parsed_feed.bozo == 1:
+		continue
 
-            for entry in parsed_feed.entries:
-                self.urls.add(entry.link)
+	    for entry in parsed_feed.entries:
+		self.urls.add(entry.link)
 
-        self.urls = list(self.urls)
-        random.shuffle(self.urls)
+	self.urls = list(self.urls)
+	random.shuffle(self.urls)
 
-        if len(self.urls) == 0:
-            logging.error("URL list is empty")
+	if len(self.urls) == 0:
+	    logging.error("URL list is empty")
 
     def get_widget(self, monitor_number):
-        return self.widget
+	return self.widget
 
     def update(self):
-        if len(self.urls) > 0 and self.update_count % len(self.urls) == 0:
-            self.update_urls()
-        self.update_count += 1
+	if len(self.urls) > 0 and self.update_count % len(self.urls) == 0:
+	    self.update_urls()
+	self.update_count += 1
 
-        if len(self.urls) > 0:
-            current_url = self.urls[self.update_count % len(self.urls)]
-        else:
-            current_url = urllib.pathname2url(
-                os.path.join(SCRIPT_DIR, "html_module_error.html"))
+	if len(self.urls) > 0:
+	    current_url = self.urls[self.update_count % len(self.urls)]
+	else:
+	    current_url = urllib.pathname2url(
+		os.path.join(SCRIPT_DIR, "html_module_error.html"))
 
-        self.webview.load_uri(current_url)
+	self.webview.load_uri(current_url)
